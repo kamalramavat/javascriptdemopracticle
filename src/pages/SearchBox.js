@@ -38,6 +38,7 @@ const SearchBox = () => {
       const response = await fetch('https://restcountries.com/v3.1/all');
       const countries = await response.json();
       setData(countries);
+      console.log(countries);
     } catch (error) {
       console.error('Error fetching data:', error);
     }
