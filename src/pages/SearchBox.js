@@ -16,10 +16,13 @@ const SearchBox = () => {
     const handleKeyDown = (event) => {
       // Check if CTRL/CMD + / is pressed
       if ((event.ctrlKey || event.metaKey) && event.key === '/') {
-        // Focus the search box when the shortcut is triggered
-        searchBoxRef.current.focus();
+        // Ensure that the searchBoxRef exists and is not null before trying to access its properties
+        if (searchBoxRef.current) {
+          searchBoxRef.current.focus();
+        }
       }
     };
+    
 
     // Attach the keyboard event listener
     document.addEventListener('keydown', handleKeyDown);
