@@ -1,11 +1,11 @@
 import logo from './logo.svg';
 import './App.css';
-import SearchBox from './pages/SearchBox';
+import MovingGif from './pages/MovingGif';
 
 function App() {
   return (
     <div className="App">
-      <SearchBox />
+      <MovingGif />
     </div>
   );
 }
