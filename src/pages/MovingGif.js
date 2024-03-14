@@ -1,58 +1,91 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import './styles.css';
 
-class MovingGif extends React.Component {
-    constructor(props) {
-        super(props);
-        this.gifRef = React.createRef();
-        this.toggleDirection = this.toggleDirection.bind(this);
-    }
+const MovingGif = () => {
+    const [position, setPosition] = useState({ x: 0, y: 0 });
+    const [isDragging, setIsDragging] = useState(false);
+    const [startPosition, setStartPosition] = useState({ x: 0, y: 0 });
 
-    getRandomInt(min, max) {
-        return Math.floor(Math.random() * (max - min + 1)) + min;
-    }
+    const getRandomPosition = () => {
+        return {
+            x: Math.random() * (window.innerWidth - 200), // Adjusted to keep GIF inside the window
+            y: Math.random() * (window.innerHeight - 200) // Adjusted to keep GIF inside the window
+        };
+    };
 
-    toggleDirection() {
-        const gif = this.gifRef.current;
+    const getRandomDirection = () => {
+        const directions = [
+            { x: Math.random() * (window.innerWidth - 200), y: Math.random() * (window.innerHeight - 200) },
+            { x: Math.random() * -window.innerWidth, y: Math.random() * -window.innerHeight },
+            { x: Math.random() * -window.innerWidth, y: Math.random() * window.innerHeight },
+            { x: Math.random() * window.innerWidth, y: Math.random() * -window.innerHeight }
+        ];
+        return directions[Math.floor(Math.random() * directions.length)];
+    };
 
-        // Generate a random number to determine the direction
-        const direction = this.getRandomInt(1, 5);
-
-        // Apply the selected direction
-        switch (direction) {
-            case 1: // Horizontal movement to the right
-                gif.style.animation = 'marquee-right 5s linear infinite'; // Start horizontal movement animation to the right
-                break;
-            case 2: // Horizontal movement to the left
-                gif.style.animation = 'marquee-left 5s linear infinite'; // Start horizontal movement animation to the left
-                break;
-            case 3: // Vertical movement
-                gif.style.animation = 'scrollDown 5s linear forwards'; // Start scrolling down animation
-                break;
-            case 4: // Opposite movement (scrolling up)
-                gif.style.animation = 'scrollUp 5s linear forwards'; // Start scrolling up animation
-                break;
-            case 5: // Opposite movement (scrolling left)
-                gif.style.animation = 'scrollLeft 5s linear forwards'; // Start scrolling left animation
-                break;
-            default:
-                break;
+    const handleClick = () => {
+        if (!isDragging) {
+            setPosition(getRandomPosition());
         }
-    }
+    };
 
-    render() {
-        return (
-            <div id="container">
-                <img
-                    ref={this.gifRef}
-                    id="gif"
-                    src="1.gif"
-                    alt="gif"
-                    onClick={this.toggleDirection}
-                />
-            </div>
-        );
-    }
-}
+    useEffect(() => {
+        const timer = setInterval(() => {
+            if (!isDragging) {
+                setPosition(prevPosition => {
+                    const direction = getRandomDirection();
+                    return {
+                        x: prevPosition.x + (direction.x - prevPosition.x) * 0.01,
+                        y: prevPosition.y + (direction.y - prevPosition.y) * 0.01
+                    };
+                });
+            }
+        }, 100);
+        
+        return () => clearInterval(timer);
+    }, [isDragging]);
+
+    const handleMouseDown = (event) => {
+        setIsDragging(true);
+        setStartPosition({
+            x: event.clientX - position.x,
+            y: event.clientY - position.y
+        });
+    };
+
+    const handleMouseMove = (event) => {
+        if (!isDragging) return;
+        setPosition({
+            x: event.clientX - startPosition.x,
+            y: event.clientY - startPosition.y
+        });
+    };
+
+    const handleMouseUp = () => {
+        setIsDragging(false);
+    };
+
+    return (
+        <div
+            onMouseDown={handleMouseDown}
+            onMouseMove={handleMouseMove}
+            onMouseUp={handleMouseUp}
+            style={{
+                position: 'absolute',
+                left: position.x,
+                top: position.y,
+                cursor: isDragging ? 'grabbing' : 'grab'
+            }}
+        >
+            <img
+                id="gif"
+                src="1.gif"
+                alt="gif"
+                onClick={handleClick}
+                style={{ cursor: 'pointer' }}
+            />
+        </div>
+    );
+};
 
 export default MovingGif;
